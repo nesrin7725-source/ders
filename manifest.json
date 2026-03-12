@@ -1,22 +1,886 @@
-{
-  "name": "Arda'nın Ders Programı",
-  "short_name": "Ders Programı",
-  "description": "Akıllı ders takip uygulaması",
-  "start_url": "/index.html",
-  "display": "standalone",
-  "background_color": "#0a0a0f",
-  "theme_color": "#7c6fff",
-  "orientation": "portrait",
-  "lang": "tr",
-  "icons": [
-    {"src": "icons/icon-72.png",  "sizes": "72x72",   "type": "image/png"},
-    {"src": "icons/icon-96.png",  "sizes": "96x96",   "type": "image/png"},
-    {"src": "icons/icon-128.png", "sizes": "128x128", "type": "image/png"},
-    {"src": "icons/icon-144.png", "sizes": "144x144", "type": "image/png"},
-    {"src": "icons/icon-152.png", "sizes": "152x152", "type": "image/png"},
-    {"src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png"},
-    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
-    {"src": "icons/icon-384.png", "sizes": "384x384", "type": "image/png"},
-    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
-  ]
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Arda'nın Ders Programı</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ders Programı">
+<meta name="theme-color" content="#4f8ef7">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1117;
+  --surface:#161b26;
+  --surface2:#1c2333;
+  --surface3:#232d42;
+  --border:rgba(148,180,255,0.10);
+  --accent:#4f8ef7;
+  --accent2:#ff8c5a;
+  --accent3:#3dd68c;
+  --accent4:#fbbf24;
+  --text:#e2e8f8;
+  --muted:#6b7a9f;
+  --danger:#f06070;
+  --warn:#f5a623;
 }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 15% 5%,rgba(79,142,247,0.12),transparent 55%),radial-gradient(ellipse 60% 50% at 85% 90%,rgba(61,214,140,0.08),transparent 50%),radial-gradient(ellipse 40% 30% at 60% 40%,rgba(255,140,90,0.05),transparent 45%);pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:20px;}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#4f8ef7,#3dd68c);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.logo-text h1{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;}
+.header-actions{display:flex;gap:7px;flex-wrap:wrap;}
+.btn{padding:7px 13px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;transition:all 0.2s;}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface3);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#9080ff;transform:translateY(-1px);}
+.day-tabs{display:flex;gap:5px;margin-bottom:18px;overflow-x:auto;padding-bottom:3px;}
+.day-tabs::-webkit-scrollbar{height:3px;}
+.day-tabs::-webkit-scrollbar-thumb{background:var(--accent);border-radius:99px;}
+.day-tab{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:500;white-space:nowrap;transition:all 0.2s;color:var(--muted);}
+.day-tab:hover{color:var(--text);}
+.day-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.day-tab.today-tab{border-color:rgba(67,232,160,0.5);color:var(--accent3);}
+.main{display:grid;grid-template-columns:1fr 295px;gap:16px;}
+@media(max-width:780px){.main{grid-template-columns:1fr;}}
+.sum-bar{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 15px;margin-bottom:12px;flex-wrap:wrap;}
+.sb-day{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;}
+.sb-stats{display:flex;gap:14px;margin-left:auto;}
+.sb-sv{font-size:14px;font-weight:700;color:var(--accent);}
+.sb-sl{font-size:10px;color:var(--muted);}
+.prog{height:3px;background:var(--surface3);border-radius:99px;margin-bottom:12px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,#4f8ef7,#3dd68c);border-radius:99px;transition:width 0.5s;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.ptitle{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--accent);}
+.timeline{display:flex;flex-direction:column;gap:3px;}
+.ts{display:flex;align-items:stretch;gap:9px;border-radius:9px;transition:background 0.15s;padding:2px 3px;}
+.ts:hover{background:var(--surface2);}
+.tt{width:48px;text-align:right;padding-top:9px;flex-shrink:0;font-size:10px;color:var(--muted);font-weight:500;}
+.tl{width:2px;background:var(--border);border-radius:99px;flex-shrink:0;position:relative;}
+.tl::before{content:'';position:absolute;top:11px;left:-3px;width:8px;height:8px;border-radius:50%;background:var(--surface3);border:2px solid var(--border);}
+.tl.tla::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px var(--accent);}
+.tl.tld::before{background:var(--accent3);border-color:var(--accent3);}
+.tb{flex:1;padding:7px 9px;border-radius:9px;min-height:42px;}
+.sc-deneme{background:linear-gradient(135deg,rgba(240,96,112,0.18),rgba(240,96,112,0.06));border:1px solid rgba(240,96,112,0.3);}
+.sc-mat{background:linear-gradient(135deg,rgba(79,142,247,0.18),rgba(79,142,247,0.06));border:1px solid rgba(79,142,247,0.3);}
+.sc-fizik{background:linear-gradient(135deg,rgba(61,214,140,0.16),rgba(61,214,140,0.05));border:1px solid rgba(61,214,140,0.28);}
+.sc-kimya{background:linear-gradient(135deg,rgba(251,191,36,0.18),rgba(251,191,36,0.06));border:1px solid rgba(251,191,36,0.3);}
+.sc-bio{background:linear-gradient(135deg,rgba(34,211,238,0.16),rgba(34,211,238,0.05));border:1px solid rgba(34,211,238,0.28);}
+.sc-turkce{background:linear-gradient(135deg,rgba(163,230,53,0.15),rgba(163,230,53,0.05));border:1px solid rgba(163,230,53,0.28);}
+.sc-geo{background:linear-gradient(135deg,rgba(167,139,250,0.18),rgba(167,139,250,0.06));border:1px solid rgba(167,139,250,0.3);}
+.sc-tarih{background:linear-gradient(135deg,rgba(255,140,90,0.18),rgba(255,140,90,0.06));border:1px solid rgba(255,140,90,0.3);}
+.sc-ara{background:rgba(107,122,159,0.08);border:1px dashed rgba(107,122,159,0.2);}
+.sdone{opacity:0.38;}
+.snow{box-shadow:0 0 20px rgba(79,142,247,0.25);border-color:#4f8ef7!important;}
+.sactive{box-shadow:0 0 24px rgba(61,214,140,0.3);border-color:#3dd68c!important;animation:pulseb 2s infinite;}
+@keyframes pulseb{0%,100%{box-shadow:0 0 16px rgba(67,232,160,0.2);}50%{box-shadow:0 0 28px rgba(67,232,160,0.4);}}
+.srow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.sicon{font-size:13px;flex-shrink:0;}
+.sname{font-size:12px;font-weight:600;flex:1;min-width:0;}
+.sbadges{display:flex;align-items:center;gap:3px;flex-shrink:0;flex-wrap:wrap;}
+.bdg{font-size:9px;font-weight:600;padding:2px 5px;border-radius:99px;}
+.bq{background:rgba(61,214,140,0.15);color:#3dd68c;font-weight:700;}
+.bd{background:rgba(148,180,255,0.10);color:var(--muted);}
+.bnow{background:rgba(79,142,247,0.25);color:#4f8ef7;animation:blnk 1.5s infinite;font-weight:700;}
+@keyframes blnk{0%,100%{opacity:1;}50%{opacity:0.5;}}
+.blate{background:rgba(255,77,109,0.2);color:var(--danger);}
+.bearly{background:rgba(67,232,160,0.2);color:var(--accent3);}
+.bontime{background:rgba(255,169,77,0.2);color:var(--accent4);}
+.ssub{font-size:10px;color:var(--muted);margin-top:2px;}
+.sact{display:flex;align-items:center;gap:5px;margin-top:5px;flex-wrap:wrap;}
+.cbtn{padding:4px 9px;border-radius:6px;border:none;cursor:pointer;font-size:10px;font-weight:600;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.cbtn-s{background:rgba(67,232,160,0.2);color:var(--accent3);}
+.cbtn-s:hover{background:rgba(67,232,160,0.35);}
+.cbtn-f{background:rgba(255,107,157,0.2);color:var(--accent2);}
+.cbtn-f:hover{background:rgba(255,107,157,0.35);}
+.cbtn-d{background:rgba(124,111,255,0.2);color:var(--accent);}
+.livet{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--accent3);background:rgba(67,232,160,0.1);padding:3px 7px;border-radius:5px;}
+.chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);background:transparent;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;}
+.chk.chkd{background:var(--accent3);border-color:var(--accent3);}
+/* SIDEBAR */
+.sw-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;margin-bottom:12px;}
+.sw-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;}
+.sw-tname{font-size:11px;color:var(--muted);margin-bottom:8px;min-height:16px;}
+.sw-tname strong{color:var(--text);}
+.sw-allot{font-size:11px;color:var(--accent4);margin-bottom:5px;}
+.sw-face{position:relative;width:128px;height:128px;margin:0 auto 12px;}
+.sw-svg{width:128px;height:128px;transform:rotate(-90deg);}
+.sw-rbg{fill:none;stroke:var(--surface3);stroke-width:7;}
+.sw-ring{fill:none;stroke:#3dd68c;stroke-width:7;stroke-linecap:round;stroke-dasharray:339.3;stroke-dashoffset:339.3;transition:stroke-dashoffset 1s linear;}
+.sw-disp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.sw-time{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1;}
+.sw-sub{font-size:9px;color:var(--muted);margin-top:2px;}
+.sw-ot{font-size:10px;color:var(--danger);font-weight:600;margin-top:5px;}
+.sw-ctrls{display:flex;gap:7px;justify-content:center;}
+.swb{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;font-size:14px;transition:all 0.2s;}
+.swbm{background:var(--accent3);color:#0a0a0f;width:48px;height:48px;font-size:18px;}
+.swbm:hover{transform:scale(1.06);}
+.swbm.run{background:var(--accent4);}
+.swbs{background:var(--surface3);color:var(--text);}
+.swbs:hover{opacity:0.8;}
+.stats-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.si{text-align:center;padding:8px;background:var(--surface);border-radius:8px;}
+.sv{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--accent);}
+.sl{font-size:9px;color:var(--muted);margin-top:1px;}
+.alarm-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;}
+.al-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.al-tgl{position:relative;width:34px;height:19px;cursor:pointer;}
+.al-tgl input{opacity:0;width:0;height:0;}
+.al-sl{position:absolute;inset:0;background:var(--surface3);border-radius:99px;transition:0.3s;}
+.al-sl::before{content:'';position:absolute;width:13px;height:13px;left:3px;top:3px;background:#fff;border-radius:50%;transition:0.3s;}
+.al-tgl input:checked+.al-sl{background:var(--accent3);}
+.al-tgl input:checked+.al-sl::before{transform:translateX(15px);}
+.al-lbl{font-size:12px;font-weight:500;}
+.al-sub{font-size:10px;color:var(--muted);}
+.al-ah{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.al-ah label{font-size:11px;color:var(--muted);}
+.al-ah select{background:var(--surface3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:3px 6px;font-size:11px;font-family:'DM Sans',sans-serif;}
+.upal-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:8px 0 5px;}
+.ali{display:flex;align-items:center;justify-content:space-between;font-size:11px;padding:5px 7px;border-radius:6px;background:var(--surface);margin-bottom:3px;}
+.ali-t{color:var(--accent4);font-weight:600;}
+.ali-n{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:125px;}
+.upzone{border:2px dashed var(--border);border-radius:11px;padding:18px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--surface2);}
+.upzone:hover,.upzone.dov{border-color:var(--accent);background:rgba(124,111,255,0.05);}
+.upi{font-size:26px;margin-bottom:5px;}
+.upt{font-size:12px;font-weight:600;margin-bottom:2px;}
+.ups{font-size:10px;color:var(--muted);}
+/* MODALS */
+.mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:500;align-items:center;justify-content:center;padding:16px;}
+.mov.open{display:flex;}
+.mdl{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;}
+.mdl h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:13px;}
+.mdl label{font-size:11px;color:var(--muted);display:block;margin-bottom:3px;margin-top:9px;}
+.mdl input,.mdl select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);outline:none;}
+.mdl input:focus,.mdl select:focus{border-color:var(--accent);}
+.mac{display:flex;gap:7px;justify-content:flex-end;margin-top:16px;}
+.ais{display:flex;align-items:center;gap:7px;font-size:12px;padding:8px 10px;border-radius:8px;margin-top:7px;}
+.ais.loading{background:rgba(255,169,77,0.1);color:var(--accent4);border:1px solid rgba(255,169,77,0.2);}
+.ais.success{background:rgba(67,232,160,0.1);color:var(--accent3);border:1px solid rgba(67,232,160,0.2);}
+.ais.error{background:rgba(255,77,109,0.1);color:var(--danger);border:1px solid rgba(255,77,109,0.2);}
+.spin{width:11px;height:11px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:sp 0.8s linear infinite;flex-shrink:0;}
+@keyframes sp{to{transform:rotate(360deg);}}
+/* BIG ALARM */
+.abig{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:900;align-items:center;justify-content:center;}
+.abig.open{display:flex;}
+.abig-box{background:var(--surface);border:2px solid var(--accent4);border-radius:20px;padding:30px;text-align:center;width:90%;max-width:340px;animation:ap 1s infinite alternate;}
+@keyframes ap{from{box-shadow:0 0 20px rgba(255,169,77,0.3);}to{box-shadow:0 0 50px rgba(255,169,77,0.7);}}
+.abig-e{font-size:52px;margin-bottom:10px;}
+.abig-t{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;margin-bottom:5px;}
+.abig-d{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+.abig-btn{padding:11px 26px;background:var(--accent4);color:#0a0a0f;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+/* NOTIF */
+.notif{position:fixed;top:14px;right:14px;background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:10px 15px;font-size:12px;font-weight:500;z-index:1000;transform:translateY(-60px);opacity:0;transition:all 0.3s;max-width:270px;line-height:1.4;}
+.notif.show{transform:translateY(0);opacity:1;}
+.notif.success{border-color:var(--accent3);}
+.notif.warn{border-color:var(--warn);}
+@keyframes fi{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.fi{animation:fi 0.25s ease;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:99px;}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">📚</div>
+    <div class="logo-text">
+      <h1>Arda'nın Programı</h1>
+      <span id="clk" style="font-size:12px;font-weight:600;color:var(--accent3)">--:--:--</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="openUpload()">📸 Yeni Program</button>
+    <button class="btn btn-ghost" onclick="openAdd()">+ Görev</button>
+  </div>
+</div>
+
+<div class="day-tabs" id="dayTabs"></div>
+
+<div class="main">
+  <div>
+    <div class="sum-bar">
+      <div>
+        <div class="sb-day" id="sDay">—</div>
+        <div style="font-size:10px;color:var(--muted)" id="sDate"></div>
+      </div>
+      <div class="sb-stats">
+        <div style="text-align:right"><div class="sb-sv" id="stTasks">0</div><div class="sb-sl">Görev</div></div>
+        <div style="text-align:right"><div class="sb-sv" id="stDone">0</div><div class="sb-sl">Bitti</div></div>
+        <div style="text-align:right"><div class="sb-sv" id="stH">0s</div><div class="sb-sl">Çalışma</div></div>
+      </div>
+    </div>
+    <div class="prog"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+    <div class="panel">
+      <div class="ptitle"><div class="pdot"></div>Günlük Program</div>
+      <div class="timeline" id="tl"></div>
+    </div>
+  </div>
+
+  <div>
+    <!-- STOPWATCH -->
+    <div class="sw-card">
+      <div class="sw-label">⏱ Kronometre</div>
+      <div class="sw-tname" id="swTN">Bir derse başla → kronometre başlar</div>
+      <div class="sw-allot" id="swA" style="display:none"></div>
+      <div class="sw-face">
+        <svg class="sw-svg" viewBox="0 0 120 120">
+          <circle class="sw-rbg" cx="60" cy="60" r="54"/>
+          <circle class="sw-ring" id="swRing" cx="60" cy="60" r="54"/>
+        </svg>
+        <div class="sw-disp">
+          <div class="sw-time" id="swT">00:00</div>
+          <div class="sw-sub">geçen süre</div>
+        </div>
+      </div>
+      <div class="sw-ot" id="swOT" style="display:none"></div>
+      <div class="sw-ctrls">
+        <button class="swb swbs" onclick="swReset()" title="Sıfırla">↺</button>
+        <button class="swb swbm" id="swBtn" onclick="swToggle()">▶</button>
+        <button class="swb swbs" onclick="swLap()" title="Not al">📌</button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-card">
+      <div class="ptitle" style="margin-bottom:9px;"><div class="pdot" style="background:var(--accent3)"></div>Günlük İstatistik</div>
+      <div class="sgrid">
+        <div class="si"><div class="sv" id="stFMin">0</div><div class="sl">⏱ Odak (dk)</div></div>
+        <div class="si"><div class="sv" id="stComp">0</div><div class="sl">✅ Tamamlanan</div></div>
+        <div class="si"><div class="sv" id="stLate">0</div><div class="sl">⏰ Geç Başlama</div></div>
+        <div class="si"><div class="sv" id="stEarly">0</div><div class="sl">⚡ Erken Başlama</div></div>
+      </div>
+    </div>
+
+    <!-- ALARM -->
+    <div class="alarm-card">
+      <div class="ptitle" style="margin-bottom:9px;"><div class="pdot" style="background:var(--accent4)"></div>Ders Alarmları</div>
+      <div class="al-row">
+        <label class="al-tgl">
+          <input type="checkbox" id="alOn" checked onchange="toggleAl()">
+          <span class="al-sl"></span>
+        </label>
+        <div><div class="al-lbl">Alarm Açık</div><div class="al-sub">Ders başlamadan önce uyarır</div></div>
+      </div>
+      <div class="al-ah">
+        <label>Kaç dk önce:</label>
+        <select id="alAh" onchange="schedAl()">
+          <option value="5">5 dk</option>
+          <option value="10" selected>10 dk</option>
+          <option value="15">15 dk</option>
+          <option value="20">20 dk</option>
+        </select>
+      </div>
+      <div class="upal-title">Yaklaşan Dersler</div>
+      <div id="upal"></div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="panel">
+      <div class="ptitle"><div class="pdot" style="background:var(--accent2)"></div>Program Güncelle</div>
+      <div class="upzone" id="upZ" onclick="openUpload()">
+        <div class="upi">🤖</div>
+        <div class="upt">Yeni Program Yükle</div>
+        <div class="ups">Fotoğraf → AI otomatik analiz</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="mov" id="addMov">
+  <div class="mdl">
+    <h2>Görev Ekle</h2>
+    <label>Görev Adı</label><input type="text" id="nName" placeholder="örn: Kimya: Asit-Baz">
+    <label>Ders</label>
+    <select id="nSub">
+      <option value="mat">Matematik</option><option value="fizik">Fizik</option>
+      <option value="kimya">Kimya</option><option value="bio">Biyoloji</option>
+      <option value="turkce">Türkçe</option><option value="geo">Coğrafya</option>
+      <option value="tarih">Tarih</option><option value="deneme">Deneme</option>
+    </select>
+    <label>Gün</label>
+    <select id="nDay">
+      <option value="0">Pazartesi</option><option value="1">Salı</option>
+      <option value="2">Çarşamba</option><option value="3">Perşembe</option>
+      <option value="4">Cuma</option><option value="5">Cumartesi</option><option value="6">Pazar</option>
+    </select>
+    <label>Saat</label>
+    <div style="display:flex;gap:7px;">
+      <input type="number" id="nH" value="8" min="6" max="23" style="width:75px;">
+      <input type="number" id="nM" value="0" min="0" max="59" style="width:75px;" placeholder="dk">
+    </div>
+    <label>Süre (dakika)</label><input type="number" id="nDur" value="60" min="15" max="300" step="15">
+    <label>Soru Sayısı</label><input type="text" id="nQ" placeholder="örn: 50 Soru">
+    <div class="mac">
+      <button class="btn btn-ghost" onclick="closeAdd()">İptal</button>
+      <button class="btn btn-primary" onclick="saveTask()">Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="mov" id="upMov">
+  <div class="mdl">
+    <h2>🤖 AI Program Analizi</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Ders programının fotoğrafını yükle, AI otomatik analiz etsin.</p>
+    <div class="upzone" id="upDz" style="margin-bottom:9px;">
+      <div class="upi">📷</div><div class="upt">Fotoğraf Seç</div><div class="ups">PNG, JPG, PDF</div>
+      <input type="file" id="fInput" accept="image/*,.pdf" style="display:none" onchange="handleFile(event)">
+    </div>
+    <div id="upPrev" style="display:none;margin-bottom:9px;"><img id="prevImg" style="width:100%;border-radius:8px;max-height:170px;object-fit:contain;background:var(--surface2);"></div>
+    <div id="upStatus" style="display:none"></div>
+    <div class="mac">
+      <button class="btn btn-ghost" onclick="closeUpload()">İptal</button>
+      <button class="btn btn-primary" onclick="document.getElementById('fInput').click()">Dosya Seç</button>
+      <button class="btn btn-primary" id="anBtn" style="display:none" onclick="analyzeImg()">🤖 Analiz Et</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALARM MODAL -->
+<div class="abig" id="alMov">
+  <div class="abig-box">
+    <div class="abig-e">⏰</div>
+    <div class="abig-t" id="alT">Ders Başlıyor!</div>
+    <div class="abig-d" id="alD"></div>
+    <button class="abig-btn" onclick="dismissAl()">Tamam, Hazırım! 💪</button>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+const DAYS=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+const ICONS={mat:'📐',fizik:'🔭',kimya:'⚗️',bio:'🧬',turkce:'📖',geo:'🌍',tarih:'🏛️',deneme:'📝',ara:'☕'};
+const SCHED_DEFAULT={
+  0:[
+    {id:'p0_1',name:'Türkçe Denemesi',subject:'deneme',icon:'📝',duration:60,questions:'',startHour:8,startMin:0},
+    {id:'p0_2',name:'TYT Matematik Denemesi',subject:'deneme',icon:'🧮',duration:90,questions:'',startHour:9,startMin:15},
+    {id:'p0_3',name:'AYT Mat: Türev',subject:'mat',icon:'📐',duration:80,questions:'Konu + 50 Soru',startHour:11,startMin:0},
+    {id:'p0_4',name:'TYT Mat: Hareket Problemleri',subject:'mat',icon:'🔢',duration:50,questions:'30 Soru',startHour:12,startMin:30},
+    {id:'p0_5',name:'Fizik: Mercekler',subject:'fizik',icon:'🔭',duration:70,questions:'50 Soru',startHour:13,startMin:30},
+    {id:'p0_6',name:'Kimya: Kimyasal Tepkimelerde Hız',subject:'kimya',icon:'⚗️',duration:70,questions:'50 Soru',startHour:14,startMin:50},
+    {id:'p0_7',name:'Türkçe: Deyim & Atasözleri',subject:'turkce',icon:'📖',duration:80,questions:'100 Soru',startHour:16,startMin:10},
+    {id:'p0_8',name:'Geo: Çember',subject:'geo',icon:'⭕',duration:55,questions:'40 Soru',startHour:17,startMin:40},
+  ],
+  1:[
+    {id:'p1_1',name:'Türkçe Denemesi',subject:'deneme',icon:'📝',duration:60,questions:'',startHour:8,startMin:0},
+    {id:'p1_2',name:'TYT Matematik Denemesi',subject:'deneme',icon:'🧮',duration:90,questions:'',startHour:9,startMin:15},
+    {id:'p1_3',name:'AYT Mat: Türev',subject:'mat',icon:'📐',duration:80,questions:'Konu + 50 Soru',startHour:11,startMin:0},
+    {id:'p1_4',name:'Biyoloji: Yaşam',subject:'bio',icon:'🧬',duration:80,questions:'Not + 50 Soru',startHour:12,startMin:30},
+    {id:'p1_5',name:'Tarih: Konu + 40 Soru',subject:'tarih',icon:'🏛️',duration:70,questions:'40 Soru',startHour:14,startMin:0},
+    {id:'p1_6',name:'Kimyasal Tepkimelerde Hız',subject:'kimya',icon:'⚗️',duration:70,questions:'50 Soru',startHour:15,startMin:20},
+    {id:'p1_7',name:'PARAGRAF (Günlük Rutin)',subject:'turkce',icon:'📖',duration:30,questions:'',startHour:16,startMin:40},
+    {id:'p1_8',name:'Geometri: Çember',subject:'mat',icon:'⭕',duration:55,questions:'40 Soru',startHour:17,startMin:20},
+  ],
+  2:[
+    {id:'p2_1',name:'Türkçe Denemesi',subject:'deneme',icon:'📝',duration:60,questions:'',startHour:8,startMin:0},
+    {id:'p2_2',name:'TYT Matematik Denemesi',subject:'deneme',icon:'🧮',duration:90,questions:'',startHour:9,startMin:15},
+    {id:'p2_3',name:'AYT Mat: Türev',subject:'mat',icon:'📐',duration:80,questions:'Konu + 50 Soru',startHour:11,startMin:0},
+    {id:'p2_4',name:'Tarih: Konu + 40 Soru',subject:'tarih',icon:'🏛️',duration:70,questions:'40 Soru',startHour:12,startMin:30},
+    {id:'p2_5',name:'Coğrafya: Konu + 40 Soru',subject:'geo',icon:'🌍',duration:70,questions:'40 Soru',startHour:13,startMin:50},
+    {id:'p2_6',name:'PARAGRAF (Günlük Rutin)',subject:'turkce',icon:'📖',duration:30,questions:'',startHour:15,startMin:10},
+    {id:'p2_7',name:'Türkçe: Tamlamalar',subject:'turkce',icon:'📝',duration:55,questions:'30 Soru',startHour:15,startMin:50},
+    {id:'p2_8',name:'AYT Mat: Diziler',subject:'mat',icon:'🔢',duration:70,questions:'50 Soru',startHour:16,startMin:55},
+  ],
+  3:[
+    {id:'p3_1',name:'Türkçe Denemesi',subject:'deneme',icon:'📝',duration:60,questions:'',startHour:8,startMin:0},
+    {id:'p3_2',name:'TYT Matematik Denemesi',subject:'deneme',icon:'🧮',duration:90,questions:'',startHour:9,startMin:15},
+    {id:'p3_3',name:'AYT Mat: Türev',subject:'mat',icon:'📐',duration:80,questions:'Konu + 50 Soru',startHour:11,startMin:0},
+    {id:'p3_4',name:'Fizik: Prizmalar ve Renkler',subject:'fizik',icon:'🔭',duration:65,questions:'40 Soru',startHour:12,startMin:30},
+    {id:'p3_5',name:'Tarih: Konu + 40 Soru',subject:'tarih',icon:'🏛️',duration:70,questions:'40 Soru',startHour:13,startMin:45},
+    {id:'p3_6',name:'PARAGRAF (Günlük Rutin)',subject:'turkce',icon:'📖',duration:30,questions:'',startHour:15,startMin:5},
+    {id:'p3_7',name:'Türkçe: Tamlamalar',subject:'turkce',icon:'📝',duration:55,questions:'30 Soru',startHour:15,startMin:45},
+    {id:'p3_8',name:'AYT Mat: Diziler',subject:'mat',icon:'🔢',duration:70,questions:'50 Soru',startHour:16,startMin:50},
+  ],
+  4:[
+    {id:'p4_1',name:'Türkçe Denemesi',subject:'deneme',icon:'📝',duration:60,questions:'',startHour:8,startMin:0},
+    {id:'p4_2',name:'TYT Matematik Denemesi',subject:'deneme',icon:'🧮',duration:90,questions:'',startHour:9,startMin:15},
+    {id:'p4_3',name:'TYT Mat: Hız Problemleri',subject:'mat',icon:'🔢',duration:55,questions:'30 Soru',startHour:11,startMin:0},
+    {id:'p4_4',name:'Fizik: Mercekler',subject:'fizik',icon:'🔭',duration:70,questions:'50 Soru',startHour:12,startMin:5},
+    {id:'p4_5',name:'Fen Denemesi',subject:'deneme',icon:'🔬',duration:90,questions:'',startHour:13,startMin:25},
+    {id:'p4_6',name:'PARAGRAF (Günlük Rutin)',subject:'turkce',icon:'📖',duration:30,questions:'',startHour:15,startMin:5},
+    {id:'p4_7',name:'Geo: Çember',subject:'geo',icon:'⭕',duration:60,questions:'40 Soru',startHour:15,startMin:45},
+    {id:'p4_8',name:'AYT Matematik: Diziler',subject:'mat',icon:'🔢',duration:50,questions:'30 Soru',startHour:16,startMin:55},
+  ],
+  5:[
+    {id:'p5_1',name:'Türkçe Denemesi',subject:'deneme',icon:'📝',duration:60,questions:'',startHour:8,startMin:0},
+    {id:'p5_2',name:'Biyoloji: Canlılar',subject:'bio',icon:'🧬',duration:80,questions:'Not + 50 Soru',startHour:9,startMin:15},
+    {id:'p5_3',name:'Fizik: Mercekler',subject:'fizik',icon:'🔭',duration:55,questions:'30 Soru',startHour:10,startMin:45},
+    {id:'p5_4',name:'Fen Denemesi',subject:'deneme',icon:'🔬',duration:90,questions:'',startHour:11,startMin:50},
+    {id:'p5_5',name:'Sosyal Denemesi',subject:'deneme',icon:'📊',duration:90,questions:'',startHour:13,startMin:35},
+    {id:'p5_6',name:'Kimyasal Tepk. Hız / Konu+40',subject:'kimya',icon:'⚗️',duration:70,questions:'40 Soru',startHour:15,startMin:25},
+    {id:'p5_7',name:'Türkçe: Deyimler',subject:'turkce',icon:'📖',duration:60,questions:'40 Soru',startHour:16,startMin:45},
+    {id:'p5_8',name:'Türkçe: Tamlamalar',subject:'turkce',icon:'📝',duration:55,questions:'30 Soru',startHour:17,startMin:55},
+  ],
+  6:[
+    {id:'p6_1',name:'AYT DENEMESİ',subject:'deneme',icon:'📝',duration:180,questions:'Tam Deneme',startHour:9,startMin:0},
+    {id:'p6_2',name:'Haftalık Analiz',subject:'mat',icon:'📊',duration:60,questions:'Eksik Konu Analizi',startHour:12,startMin:30},
+    {id:'p6_3',name:'Eksik Konu Tamamlama',subject:'deneme',icon:'🔍',duration:90,questions:'',startHour:13,startMin:45},
+    {id:'p6_4',name:'AYT DENEMESİ (2.)',subject:'deneme',icon:'📝',duration:180,questions:'Tam Deneme',startHour:15,startMin:30},
+    {id:'p6_5',name:'Dinlenme & Değerlendirme',subject:'ara',icon:'😴',duration:60,questions:'',startHour:18,startMin:30},
+  ]
+};
+
+let S={
+  day:0,
+  sched:JSON.parse(localStorage.getItem('sched')||JSON.stringify(SCHED_DEFAULT)),
+  done:JSON.parse(localStorage.getItem('done')||'{}'),
+  sess:JSON.parse(localStorage.getItem('sess')||'{}'),
+  firedAl:new Set(JSON.parse(localStorage.getItem('firedAl')||'[]')),
+  alOn:true,alAhead:10,
+  swRun:false,swSec:0,swInv:null,swTid:null,swTdur:0,
+  focMin:parseInt(localStorage.getItem('focMin')||'0'),
+  imgB64:null
+};
+
+// CLOCK
+setInterval(()=>{document.getElementById('clk').textContent=new Date().toLocaleTimeString('tr-TR');},1000);
+
+// HELPERS
+const fmt=(h,m)=>`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+const addM=(h,m,a)=>{const t=h*60+m+a;return{h:Math.floor(t/60)%24,m:t%60};};
+const toM=(h,m)=>h*60+m;
+const nowM=()=>{const n=new Date();return n.getHours()*60+n.getMinutes();};
+const nowSec=()=>{const n=new Date();return n.getHours()*3600+n.getMinutes()*60+n.getSeconds();};
+const todayIdx=()=>({1:0,2:1,3:2,4:3,5:4,6:5,0:6}[new Date().getDay()]??0);
+const sc=s=>'sc-'+s;
+const findT=id=>{for(let d=0;d<7;d++){const t=(S.sched[d]||[]).find(x=>x.id===id);if(t)return t;}return null;};
+
+function init(){
+  S.day=todayIdx();
+  buildTabs();renderTL();updateUpal();
+  setInterval(checkAl,30000);
+  setTimeout(checkAl,2000);
+  setInterval(()=>{renderTL();updateUpal();},60000);
+}
+
+function buildTabs(){
+  const c=document.getElementById('dayTabs');c.innerHTML='';
+  const ti=todayIdx();
+  DAYS.forEach((d,i)=>{
+    const b=document.createElement('button');
+    b.className='day-tab'+(i===6?' sunday':'')+(i===S.day?' active':'')+(i===ti?' today-tab':'');
+    b.textContent=d+(i===ti?' ●':'');
+    b.onclick=()=>{S.day=i;buildTabs();renderTL();};
+    c.appendChild(b);
+  });
+}
+
+function renderTL(){
+  const tasks=S.sched[S.day]||[];
+  const dk=`${S.day}`;
+  const done=S.done[dk]||{};
+  const ti=todayIdx();
+  const isToday=S.day===ti;
+  const nm=nowM();
+  document.getElementById('sDay').textContent=DAYS[S.day];
+  document.getElementById('sDate').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  if(!tasks.length){
+    document.getElementById('tl').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:38px;margin-bottom:8px">🎉</div>Bugün dinlenme günü!</div>';
+    return;
+  }
+
+  let html='',tdone=0,tmins=0;
+  tasks.forEach((task,idx)=>{
+    const isDone=!!done[task.id];
+    if(isDone)tdone++;tmins+=task.duration;
+    const end=addM(task.startHour,task.startMin,task.duration);
+    const ts=toM(task.startHour,task.startMin),te=toM(end.h,end.m);
+    const isNow=isToday&&nm>=ts&&nm<te;
+    const sess=S.sess[task.id];
+    const isActive=sess&&sess.st&&!sess.et;
+
+    // break
+    if(idx>0){
+      const p=tasks[idx-1],pe=addM(p.startHour,p.startMin,p.duration);
+      const gap=ts-toM(pe.h,pe.m);
+      if(gap>=5){
+        const bl=gap<=10?'☕ Kısa Mola':gap<=20?'🍎 Ara':'🌟 Uzun Mola';
+        html+=`<div class="ts"><div class="tt">${fmt(pe.h,pe.m)}</div><div class="tl"></div>
+          <div class="tb sc-ara" style="display:flex;align-items:center;gap:7px;min-height:28px;">
+            <span style="font-size:11px">${bl}</span><span style="font-size:10px;color:var(--muted)">${gap} dk</span>
+          </div></div>`;
+      }
+    }
+
+    // timing badge
+    let tbdg='';
+    if(sess&&sess.st){
+      const diff=Math.floor(sess.st/60)-ts;
+      if(diff>3)tbdg=`<span class="bdg blate">⏰ ${diff}dk geç</span>`;
+      else if(diff<-3)tbdg=`<span class="bdg bearly">⚡ ${Math.abs(diff)}dk erken</span>`;
+      else tbdg=`<span class="bdg bontime">✓ Zamanında</span>`;
+    }
+
+    // actions
+    let act='';
+    if(!isDone){
+      if(!isActive){
+        act+=`<button class="cbtn cbtn-s" onclick="startS('${task.id}',${task.duration})">▶ Başla</button>`;
+      }else{
+        const el=Math.floor((nowSec()-sess.st)/60);
+        act+=`<span class="livet" id="lv_${task.id}">▶ ${el}dk</span>`;
+        act+=`<button class="cbtn cbtn-f" onclick="finishS('${task.id}')">■ Bitir</button>`;
+      }
+      act+=`<button class="cbtn cbtn-d" onclick="tglDone('${task.id}')">✓ Tamamla</button>`;
+    }else{
+      const sr=S.sess[task.id];
+      act+=`<span style="font-size:10px;color:var(--accent3)">✅ ${sr&&sr.dur?sr.dur+'dk\'da ':''} tamamlandı</span>`;
+      act+=`<button class="cbtn" style="background:rgba(255,255,255,0.06);color:var(--muted)" onclick="tglDone('${task.id}')">↩</button>`;
+    }
+
+    const lc=isDone?' tld':isNow||isActive?' tla':'';
+    const bc=isDone?' sdone':isActive?' sactive':isNow?' snow':'';
+
+    html+=`<div class="ts fi"><div class="tt">${fmt(task.startHour,task.startMin)}</div>
+      <div class="tl${lc}"></div>
+      <div class="tb ${sc(task.subject)}${bc}">
+        <div class="srow">
+          <span class="sicon">${task.icon}</span>
+          <span class="sname">${task.name}</span>
+          <div class="sbadges">
+            ${task.questions?`<span class="bdg bq">${task.questions}</span>`:''}
+            <span class="bdg bd">${task.duration}dk</span>
+            ${isNow&&!isDone?'<span class="bdg bnow">ŞU AN</span>':''}
+            ${tbdg}
+          </div>
+          <button class="chk ${isDone?'chkd':''}" onclick="tglDone('${task.id}')">${isDone?'✓':''}</button>
+        </div>
+        <div class="ssub">${fmt(task.startHour,task.startMin)} – ${fmt(end.h,end.m)} · ${task.duration} dakika ayrıldı</div>
+        <div class="sact">${act}</div>
+      </div></div>`;
+  });
+
+  document.getElementById('tl').innerHTML=html;
+  document.getElementById('stTasks').textContent=tasks.length;
+  document.getElementById('stDone').textContent=tdone;
+  document.getElementById('stH').textContent=Math.round(tmins/60*10)/10+'s';
+  document.getElementById('prog').style.width=(tasks.length?Math.round(tdone/tasks.length*100):0)+'%';
+  document.getElementById('stComp').textContent=tdone;
+
+  let late=0,early=0;
+  tasks.forEach(t=>{const ss=S.sess[t.id];if(ss&&ss.st){const d=Math.floor(ss.st/60)-toM(t.startHour,t.startMin);if(d>3)late++;else if(d<-3)early++;}});
+  document.getElementById('stLate').textContent=late;
+  document.getElementById('stEarly').textContent=early;
+  document.getElementById('stFMin').textContent=S.focMin;
+
+  startLiveUpdate();
+}
+
+function startLiveUpdate(){
+  clearInterval(window.lvInv);
+  window.lvInv=setInterval(()=>{
+    const tasks=S.sched[S.day]||[];
+    tasks.forEach(t=>{
+      const ss=S.sess[t.id];
+      if(ss&&ss.st&&!ss.et){
+        const el=document.getElementById(`lv_${t.id}`);
+        if(el){const m=Math.floor((nowSec()-ss.st)/60);el.textContent=`▶ ${m}dk`;}
+        if(S.swTid===t.id){S.swSec=nowSec()-ss.st;updateSwD();}
+      }
+    });
+  },1000);
+}
+
+// SESSION
+function startS(id,dur){
+  Object.keys(S.sess).forEach(k=>{if(S.sess[k].st&&!S.sess[k].et&&k!==id){S.sess[k].et=nowSec();}});
+  S.sess[id]={st:nowSec(),et:null,dur:null};
+  localStorage.setItem('sess',JSON.stringify(S.sess));
+  const t=findT(id);
+  swForTask(id,dur,t?t.name:'');
+  renderTL();
+  showN(`▶ "${t?.name}" başladı!`,'success');
+}
+
+function finishS(id){
+  const ss=S.sess[id];if(!ss)return;
+  ss.et=nowSec();ss.dur=Math.round((ss.et-ss.st)/60);
+  S.focMin+=ss.dur;
+  localStorage.setItem('focMin',S.focMin);
+  localStorage.setItem('sess',JSON.stringify(S.sess));
+  const dk=`${S.day}`;
+  if(!S.done[dk])S.done[dk]={};
+  S.done[dk][id]=true;
+  localStorage.setItem('done',JSON.stringify(S.done));
+  swStop();
+  const t=findT(id);
+  const pl=t?t.duration:0,act=ss.dur,diff=act-pl;
+  let msg=`✅ "${t?.name}" bitti! ${act}dk sürdü.`;
+  if(Math.abs(diff)>5)msg+=diff>0?` (+${diff}dk fazla)`:` (${Math.abs(diff)}dk az)`;
+  showN(msg,'success');
+  renderTL();
+}
+
+function tglDone(id){
+  const dk=`${S.day}`;
+  if(!S.done[dk])S.done[dk]={};
+  S.done[dk][id]=!S.done[dk][id];
+  if(!S.done[dk][id]&&S.sess[id]){delete S.sess[id];localStorage.setItem('sess',JSON.stringify(S.sess));}
+  localStorage.setItem('done',JSON.stringify(S.done));
+  renderTL();
+}
+
+// STOPWATCH
+function swForTask(id,dur,name){
+  swStop();S.swTid=id;S.swTdur=dur*60;
+  S.swSec=S.sess[id]?nowSec()-S.sess[id].st:0;
+  document.getElementById('swTN').innerHTML=`<strong>${name}</strong>`;
+  document.getElementById('swA').style.display='block';
+  document.getElementById('swA').textContent=`Ayrılan süre: ${dur} dk`;
+  S.swRun=true;
+  document.getElementById('swBtn').textContent='⏸';
+  document.getElementById('swBtn').classList.add('run');
+  clearInterval(S.swInv);
+  S.swInv=setInterval(swTick,1000);
+  updateSwD();
+}
+
+function swToggle(){
+  if(S.swRun){swStop();}
+  else{
+    if(!S.swTid){showN('Önce bir derse başla!');return;}
+    S.swRun=true;
+    document.getElementById('swBtn').textContent='⏸';
+    document.getElementById('swBtn').classList.add('run');
+    clearInterval(S.swInv);S.swInv=setInterval(swTick,1000);
+  }
+}
+
+function swStop(){
+  S.swRun=false;clearInterval(S.swInv);
+  document.getElementById('swBtn').textContent='▶';
+  document.getElementById('swBtn').classList.remove('run');
+}
+
+function swReset(){
+  swStop();S.swSec=0;S.swTid=null;
+  document.getElementById('swTN').textContent='Bir derse başla → kronometre başlar';
+  document.getElementById('swA').style.display='none';
+  document.getElementById('swOT').style.display='none';
+  document.getElementById('swRing').style.strokeDashoffset='339.3';
+  document.getElementById('swT').textContent='00:00';
+}
+
+function swLap(){
+  if(!S.swTid)return;
+  const t=findT(S.swTid);
+  showN(`📌 ${t?.name}: ${Math.floor(S.swSec/60)}dk geçti`);
+}
+
+function swTick(){S.swSec++;updateSwD();}
+
+function updateSwD(){
+  const m=Math.floor(S.swSec/60),s=S.swSec%60;
+  document.getElementById('swT').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if(S.swTdur>0){
+    const pct=Math.min(S.swSec/S.swTdur,1);
+    document.getElementById('swRing').style.strokeDashoffset=339.3-pct*339.3;
+    const ot=S.swSec-S.swTdur;
+    const oel=document.getElementById('swOT');
+    if(ot>0){
+      document.getElementById('swRing').style.stroke='var(--danger)';
+      oel.style.display='block';
+      oel.textContent=`⚠ ${String(Math.floor(ot/60)).padStart(2,'0')}:${String(ot%60).padStart(2,'0')} fazla mesai!`;
+    }else{
+      document.getElementById('swRing').style.stroke='var(--accent3)';
+      oel.style.display='none';
+    }
+  }
+}
+
+// ALARMS
+function toggleAl(){S.alOn=document.getElementById('alOn').checked;updateUpal();}
+function schedAl(){S.alAhead=parseInt(document.getElementById('alAh').value);updateUpal();}
+
+function updateUpal(){
+  if(!S.alOn){document.getElementById('upal').innerHTML='<div style="font-size:11px;color:var(--muted);padding:3px">Alarmlar kapalı</div>';return;}
+  const ti=todayIdx();
+  const tasks=S.sched[ti]||[];
+  const nm=nowM();
+  const up=tasks.filter(t=>toM(t.startHour,t.startMin)>nm&&toM(t.startHour,t.startMin)<=nm+60)
+    .sort((a,b)=>toM(a.startHour,a.startMin)-toM(b.startHour,b.startMin)).slice(0,4);
+  if(!up.length){document.getElementById('upal').innerHTML='<div style="font-size:11px;color:var(--muted);padding:3px">Sonraki 1 saatte ders yok</div>';return;}
+  document.getElementById('upal').innerHTML=up.map(t=>
+    `<div class="ali"><span class="ali-t">${fmt(t.startHour,t.startMin)}</span><span class="ali-n">${t.icon} ${t.name}</span></div>`
+  ).join('');
+}
+
+function checkAl(){
+  if(!S.alOn)return;
+  const ti=todayIdx();
+  const tasks=S.sched[ti]||[];
+  const nm=nowM();
+  tasks.forEach(task=>{
+    const ts=toM(task.startHour,task.startMin);
+    const alAt=ts-S.alAhead;
+    const ak=`${task.id}_${new Date().toDateString()}`;
+    if(nm>=alAt&&nm<ts&&!S.firedAl.has(ak)){
+      S.firedAl.add(ak);
+      localStorage.setItem('firedAl',JSON.stringify([...S.firedAl]));
+      triggerAl(task,ts-nm);
+    }
+  });
+  updateUpal();
+}
+
+function triggerAl(task,min){
+  playAl();
+  document.getElementById('alT').textContent=`${task.icon} ${task.name}`;
+  document.getElementById('alD').innerHTML=`<strong>${min} dakika sonra başlıyor!</strong><br>Saat ${fmt(task.startHour,task.startMin)}<br>${task.questions?'📌 '+task.questions:''}`;
+  document.getElementById('alMov').classList.add('open');
+}
+
+function dismissAl(){document.getElementById('alMov').classList.remove('open');}
+
+function playAl(){
+  try{
+    const c=new(window.AudioContext||window.webkitAudioContext)();
+    [0,0.3,0.6].forEach(d=>{
+      const o=c.createOscillator(),g=c.createGain();
+      o.connect(g);g.connect(c.destination);
+      o.frequency.value=d===0?880:d===0.3?1100:660;o.type='sine';
+      g.gain.setValueAtTime(0.4,c.currentTime+d);
+      g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d+0.4);
+      o.start(c.currentTime+d);o.stop(c.currentTime+d+0.4);
+    });
+  }catch(e){}
+}
+
+// ADD TASK
+function openAdd(){document.getElementById('addMov').classList.add('open');document.getElementById('nDay').value=S.day;}
+function closeAdd(){document.getElementById('addMov').classList.remove('open');}
+function saveTask(){
+  const name=document.getElementById('nName').value.trim();
+  if(!name){showN('Görev adı boş olamaz!');return;}
+  const sub=document.getElementById('nSub').value;
+  const day=parseInt(document.getElementById('nDay').value);
+  const dur=parseInt(document.getElementById('nDur').value);
+  const q=document.getElementById('nQ').value.trim();
+  const sh=parseInt(document.getElementById('nH').value)||8;
+  const sm=parseInt(document.getElementById('nM').value)||0;
+  const t={id:`c_${Date.now()}`,name,subject:sub,icon:ICONS[sub]||'📌',duration:dur,questions:q,startHour:sh,startMin:sm};
+  if(!S.sched[day])S.sched[day]=[];
+  S.sched[day].push(t);
+  S.sched[day].sort((a,b)=>toM(a.startHour,a.startMin)-toM(b.startHour,b.startMin));
+  localStorage.setItem('sched',JSON.stringify(S.sched));
+  closeAdd();renderTL();showN(`✅ "${name}" eklendi!`,'success');
+  document.getElementById('nName').value='';
+}
+
+// UPLOAD / AI
+function openUpload(){document.getElementById('upMov').classList.add('open');}
+function closeUpload(){
+  document.getElementById('upMov').classList.remove('open');S.imgB64=null;
+  document.getElementById('upPrev').style.display='none';
+  document.getElementById('anBtn').style.display='none';
+  document.getElementById('upStatus').style.display='none';
+}
+
+function handleFile(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    S.imgB64=ev.target.result;
+    if(f.type.startsWith('image/')){document.getElementById('prevImg').src=ev.target.result;document.getElementById('upPrev').style.display='block';}
+    document.getElementById('anBtn').style.display='block';
+    showN('📎 Dosya hazır!');
+  };
+  r.readAsDataURL(f);
+}
+
+async function analyzeImg(){
+  if(!S.imgB64)return;
+  const se=document.getElementById('upStatus');
+  se.style.display='block';
+  se.innerHTML='<div class="ais loading"><div class="spin"></div> AI analiz ediyor...</div>';
+  document.getElementById('anBtn').disabled=true;
+  try{
+    const b64=S.imgB64.split(',')[1];
+    const mt=S.imgB64.split(';')[0].split(':')[1];
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mt,data:b64}},
+          {type:'text',text:'Bu Türk öğrencinin haftalık ders programı. Analiz et ve SADECE JSON ver:\n{"0":[{"name":"","subject":"mat|fizik|kimya|bio|turkce|geo|tarih|deneme|ara","icon":"emoji","duration":60,"questions":"50 Soru veya boş","startHour":8,"startMin":0}],...,"6":[...]}\n0=Pazartesi...6=Pazar. Türkçe denemesi=60dk, diğer denemeler=90dk, konu+soru=70dk, paragraf=30dk. Saatleri sıraya göre 08:00\'dan ata. Sadece JSON, başka bir şey yazma.'}
+        ]}]
+      })
+    });
+    const data=await resp.json();
+    if(data.error)throw new Error(data.error.message);
+    const raw=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(raw);
+    const ns={};
+    for(let d=0;d<7;d++){
+      ns[d]=(parsed[d.toString()]||parsed[d]||[]).map((t,i)=>({...t,id:`ai_${d}_${i}_${Date.now()}`}));
+    }
+    S.sched=ns;S.done={};S.sess={};
+    localStorage.setItem('sched',JSON.stringify(S.sched));
+    localStorage.setItem('done','{}');localStorage.setItem('sess','{}');
+    se.innerHTML='<div class="ais success">✅ Program güncellendi!</div>';
+    setTimeout(()=>{closeUpload();renderTL();updateUpal();showN('🎉 Yeni program yüklendi!','success');},1200);
+  }catch(err){
+    se.innerHTML=`<div class="ais error">❌ ${err.message}</div>`;
+    document.getElementById('anBtn').disabled=false;
+  }
+}
+
+const upDz=document.getElementById('upDz');
+upDz.addEventListener('click',()=>document.getElementById('fInput').click());
+upDz.addEventListener('dragover',e=>{e.preventDefault();upDz.classList.add('dov');});
+upDz.addEventListener('dragleave',()=>upDz.classList.remove('dov'));
+upDz.addEventListener('drop',e=>{e.preventDefault();upDz.classList.remove('dov');const f=e.dataTransfer.files[0];if(f)handleFile({target:{files:[f]}});});
+
+// NOTIFICATIONS
+let nTO;
+function showN(msg,type=''){
+  const el=document.getElementById('notif');
+  el.textContent=msg;el.className='notif show'+(type?' '+type:'');
+  clearTimeout(nTO);nTO=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+document.querySelectorAll('.mov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+init();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));
+}
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone=window.navigator.standalone===true;
+if(isIOS&&!isStandalone&&!localStorage.getItem('bannerDismissed')){
+  setTimeout(()=>{
+    const b=document.createElement('div');
+    b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1c2333;border-top:1px solid rgba(79,142,247,0.4);padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))';
+    b.innerHTML=`<div style="display:flex;align-items:center;gap:10px;max-width:500px;margin:0 auto">
+      <div style="font-size:36px">📚</div>
+      <div style="flex:1">
+        <div style="color:#e2e8f8;font-weight:700;font-size:14px">Ana Ekrana Ekle!</div>
+        <div style="color:#6b7a9f;font-size:11px;margin-top:3px">
+          Alttaki <b style="color:#4f8ef7">Paylaş ⬆</b> → <b style="color:#4f8ef7">Ana Ekrana Ekle +</b>
+        </div>
+      </div>
+      <button onclick="this.parentElement.parentElement.remove();localStorage.setItem('bannerDismissed','1')" 
+        style="background:rgba(255,255,255,0.1);border:none;color:#6b7a9f;font-size:20px;padding:6px 10px;border-radius:8px;cursor:pointer">✕</button>
+    </div>`;
+    document.body.appendChild(b);
+  },2000);
+}
+</script>
+</body>
+</html>

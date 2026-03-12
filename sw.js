@@ -1,13 +1,22 @@
-const CACHE = 'arda-v2';
-const ASSETS = ['/index.html', '/manifest.json'];
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(()=>{}));
-  self.skipWaiting();
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
-  self.clients.claim();
-});
-self.addEventListener('fetch', e => {
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).catch(()=>caches.match('/index.html'))));
-});
+{
+  "name": "Arda'nın Ders Programı",
+  "short_name": "Ders Programı",
+  "description": "Akıllı ders takip uygulaması",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#7c6fff",
+  "orientation": "portrait",
+  "lang": "tr",
+  "icons": [
+    {"src": "icons/icon-72.png",  "sizes": "72x72",   "type": "image/png"},
+    {"src": "icons/icon-96.png",  "sizes": "96x96",   "type": "image/png"},
+    {"src": "icons/icon-128.png", "sizes": "128x128", "type": "image/png"},
+    {"src": "icons/icon-144.png", "sizes": "144x144", "type": "image/png"},
+    {"src": "icons/icon-152.png", "sizes": "152x152", "type": "image/png"},
+    {"src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png"},
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icons/icon-384.png", "sizes": "384x384", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
